@@ -1,51 +1,51 @@
 #include "monty.h"
-#include <ctype.h>
 
 /**
- * check_for_digit - checks that a string only contains digits
- * @arg: string to check
- *
- * Return: 0 if only digits, else 1
- */
-static int check_for_digit(char *arg)
-{
-	int i;
-
-	for (i = 0; arg[i]; i++)
-	{
-		if (arg[i] == '-' && i == 0)
-			continue;
-		if (isdigit(arg[i]) == 0)
-			return (1);
-	}
-	return (0);
-}
-
-/**
- * m_push - push an integer onto the stack
- * @stack: double pointer to the beginning of the stack
- * @line_number: script line number
- *
+ * push - push @push_num to the top of the stack
+ * @stack: the doubly linked list to push @push_num to the top of
+ * @l: current line being processed in the monty bytecode f
+ * @ln: line number of monty f currently being processed
+ * @i: where the caret on the line @ln is in the monty f
  * Return: void
  */
-void m_push(stack_t **stack, unsigned int line_number)
-{
-	char *arg;
-	int n;
 
-	arg = strtok(NULL, "\n\t\r ");
-	if (arg == NULL || check_for_digit(arg))
+void push(stack_t **stack, char *l, int ln, int i)
+{
+	/* String returned from strtol, to check if it has run correctly */
+	char *return_string = "", *token = strtok(NULL, DELIM);
+	char a = (l + i + 4 + 1)[0];
+	int not_num = 0, j;
+	long push_num;
+
+	if (token)
+		push_num = strtol(token, &return_string, 10);
+	else
 	{
-		dprintf(STDOUT_FILENO,
-			"L%u: usage: push integer\n",
-			line_number);
+		free_dlistint(*stack);
+		fprintf(stderr, "L%d: usage: push integer\n", ln);
+		fclose(file);
 		exit(EXIT_FAILURE);
 	}
-	n = atoi(arg);
-	if (!add_node(stack, n))
+
+	for (j = 1; a != 0; j++)
 	{
-		dprintf(STDOUT_FILENO, "Error: malloc failed\n");
+		a = (l + i + 4 + j)[0];
+		if ((a >= 48 && a <= 57) || a == ' ' || a == '\n' || a == 0 || a == '-')
+		{
+			if ((l + i + 4 + j + 1)[0] == ' ' || (l + i + 4 + j + 1)[0] == '\n')
+				break;
+			continue;
+		}
+		else
+			not_num = 1;
+	}
+	if (return_string == l + i + 4 || not_num)
+	{
+		free_dlistint(*stack);
+		fprintf(stderr, "L%d: usage: push integer\n", ln);
+		fclose(file);
 		exit(EXIT_FAILURE);
 	}
-	var.stack_len++;
+	add_dnodeint(stack, (int) push_num);
+
 }

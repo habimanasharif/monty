@@ -1,30 +1,12 @@
-#ifndef _MONTY_H_
-#define _MONTY_H_
+#ifndef MONTY_MONTY_H
+#define MONTY_MONTY_H
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
-
-/**
- * struct var_s - struct to contain the main variables of the Monty interpreter
- * @queue: flag to determine if in stack vs queue mode
- * @stack_len: length of the stack
- */
-typedef struct var_s
-{
-	int queue;
-	size_t stack_len;
-} var_t;
-
-#define STACK 0
-#define QUEUE 1
-
-/* global struct to hold flag for queue and stack length */
-extern var_t var;
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#define DELIM " \n\t\r\a"
 
 /**
  * struct stack_s - doubly linked list representation of a stack (or queue)
@@ -33,7 +15,7 @@ extern var_t var;
  * @next: points to the next element of the stack (or queue)
  *
  * Description: doubly linked list node structure
- * for stack, queues, LIFO, FIFO Holberton project
+ * for stack, queues, LIFO, FIFO
  */
 typedef struct stack_s
 {
@@ -41,43 +23,59 @@ typedef struct stack_s
 	struct stack_s *prev;
 	struct stack_s *next;
 } stack_t;
+extern FILE *file;
 
 /**
- * struct instruction_s - opcoode and its function
+ * struct instruction_s - opcode and its function
  * @opcode: the opcode
  * @f: function to handle the opcode
  *
  * Description: opcode and its function
- * for stack, queues, LIFO, FIFO Holberton project
+ * for stack, queues, LIFO, FIFO
  */
 typedef struct instruction_s
 {
 	char *opcode;
 	void (*f)(stack_t **stack, unsigned int line_number);
 } instruction_t;
+/**
+ * get_instruction_func - returns the right function for the opcode @s
+ * @ln: the line number currently being processed in @file
+ * Return: void
+ */
+void (*get_instruction_func(const char *s))(stack_t **stack,
+											unsigned int ln);
 
-void get_op(char *op, stack_t **stack, unsigned int line_number);
-void m_push(stack_t **stack, unsigned int line_number);
-void m_push2(stack_t **stack, int n);
-void m_pall(stack_t **stack, unsigned int line_number);
-void m_pint(stack_t **stack, unsigned int line_number);
-void m_pop(stack_t **stack, unsigned int line_number);
-void m_swap(stack_t **stack, unsigned int line_number);
-void m_add(stack_t **stack, unsigned int line_number);
-void m_nop(stack_t **stack, unsigned int line_number);
-void m_sub(stack_t **stack, unsigned int line_number);
-void m_mul(stack_t **stack, unsigned int line_number);
-void m_div(stack_t **stack, unsigned int line_number);
-void m_mod(stack_t **stack, unsigned int line_number);
-void rotl(stack_t **stack, unsigned int line_number);
-void rotr(stack_t **stack, unsigned int line_number);
-void m_stack(stack_t **stack, unsigned int line_number);
-void m_queue(stack_t **stack, unsigned int line_number);
-void m_pchar(stack_t **stack, unsigned int line_number);
-void m_pstr(stack_t **stack, unsigned int line_number);
-void free_stack(int status, void *arg);
-void m_fs_close(int status, void *arg);
-void free_lineptr(int status, void *arg);
-stack_t *add_node(stack_t **stack, const int n);
 
-#endif /* _MONTY_H_ */
+void process_lines(char **opcodes, stack_t **stack, int supported_opcodes);
+void process_opcode(char *l, int ln, int i, int j, char **opcodes, stack_t
+**stack);
+
+
+/* Stack functions */
+stack_t *add_dnodeint(stack_t **stack, int n);
+size_t print_dlistint(const stack_t *stack);
+void free_dlistint(stack_t *head);
+int delete_dnodeint_at_index(stack_t **head, unsigned int index);
+stack_t *add_dnodeint_end(stack_t **head, int n);
+
+/*
+ * Opcode functions
+ * ln - stands for line number being processed when the opcode is called
+ */
+
+void push(stack_t **stack, char *l, int ln, int i);
+void pint(stack_t **stack, unsigned int ln);
+void pop(stack_t **stack, unsigned int ln);
+void swap(stack_t **stack, unsigned int ln);
+void add(stack_t **stack, unsigned int ln);
+void sub(stack_t **stack, unsigned int ln);
+void mul(stack_t **stack, unsigned int ln);
+void div_(stack_t **stack, unsigned int ln);
+void mod(stack_t **stack, unsigned int ln);
+void pchar(stack_t **stack, unsigned int ln);
+void pstr(stack_t **stack);
+void rotl(stack_t **stack);
+void rotr(stack_t **stack);
+
+#endif /* MONTY_MONTY_H */
